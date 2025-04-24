@@ -1,34 +1,39 @@
-name: Deploy Snake
+name: Generate Snake Contribution Grid
 
 on:
-  push:
-    branches: [ output ]
+  # 每天 UTC 时间凌晨 0 点自动执行一次
+  schedule:
+    - cron: "0 0 * * *"
+  # 允许手动触发
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
-
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  generate:
     runs-on: ubuntu-latest
+
     steps:
+      # 第一步：检出你的仓库代码（必须）
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+      # 第二步：生成贡献图动图
+      - name: Generate snake SVG
+        uses: Platane/snk@master
         with:
-          path: dist/
+          github_user_name: L-w-p-999    # ←← 改成你的 GitHub 用户名
+          outputs: |
+            dist/github-contribution-grid-snake.svg
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
 
+      # 可选：列出文件夹，确认生成成功
+      - name: Show generated files
+        run: ls -R dist
+
+      # 第三步：部署到 GitHub Pages 的 output 分支
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: crazy-max/ghaction-github-pages@v3
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
