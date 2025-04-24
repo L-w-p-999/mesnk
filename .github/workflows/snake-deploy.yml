@@ -1,6 +1,7 @@
 # 文件路径：.github/workflows/snake-deploy.yml
 
-name: Generate and Deploy Snake Contribution Grid
+# .github/workflows/snake-deploy.yml
+name: Generate and Deploy Snake
 
 on:
   schedule:
@@ -15,23 +16,22 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # ←—— 确保这里有 environment 部分 ——→
     environment:
-      name: github-pages
+      name: github-pages   # ← 必须有这一行
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Generate snake SVG
         uses: Platane/snk@master
         with:
-          github_user_name: Lwp-999      # ← 改成你的用户名
+          github_user_name: L-w-p-999
           outputs: |
             dist/github-contribution-grid-snake.svg
             dist/github-contribution-grid-snake-dark.svg?palette=github-dark
 
-      - name: Upload artifact for Pages
+      - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: dist/
@@ -39,3 +39,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Print URL
+        run: echo "Page URL: ${{ steps.deployment.outputs.page_url }}"
